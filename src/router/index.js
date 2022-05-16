@@ -1,22 +1,49 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import store from '../store'
 
 Vue.use(VueRouter)
+
+import Login from '../views/Login'
+import Register from '../views/Register'
+import Dashboard from '../views/Dashboard'
+import Universities from '../views/Universities'
+import University from '../views/University'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'Dashboard',
+    component: Dashboard,
+    meta: {
+      requiresLogin: true
+    }
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/register',
+    name: 'Registration',
+    component: Register
+  },
+  {
+    path: '/universities',
+    name: 'Universities',
+    component: Universities,
+  },
+  {
+    path: '/university/:name/',
+    name: 'University',
+    props: true,
+    component: University,
+  },
+  {
+    path: '*',
+    name: 'Error',
+    redirect: '/'
   }
 ]
 
@@ -25,5 +52,23 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+store.dispatch('isUserAuth');
+
+router.beforeEach((to, from, next) => {
+  switch(true) {
+    case (to.matched.some(record => record.meta.requiresLogin && !store.getters.userAuth)):
+      next('/login')
+      break;
+    case (to.path == '/login' && store.getters.userAuth):
+      next('/')
+      break;
+    case (to.path == '/register' && store.getters.userAuth):
+      next('/')
+      break;
+    default:
+      next()
+  }
+});
 
 export default router
