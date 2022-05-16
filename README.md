@@ -1,4 +1,4 @@
-# proj
+# Krock.Universe
 
 ## Project setup
 ```
